@@ -1,0 +1,25 @@
+{
+  "name": "storio",
+  "version": "1.0.2",
+  "main": "index.js",
+  "module": "index.js",
+  "description": "A simple React store provider",
+  "keywords": [
+    "react",
+    "state-management",
+    "store",
+    "hooks"
+  ],
+  "author": "Med Dhia Bouthouri",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
