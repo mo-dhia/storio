@@ -1,6 +1,6 @@
 {
   "name": "storio",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "index.js",
   "module": "index.js",
   "description": "A simple React store provider",

@@ -1,6 +1,15 @@
 # Storio
 
-A lightweight, efficient state management solution for React applications with zero dependencies beyond React itself. Storio provides a simple and intuitive API for managing global state without the complexity of contexts or additional dependencies.
+A lightweight, efficient state management solution for React with zero dependencies beyond React itself. Storio gives you the simplicity of Zustand with the predictability of useSyncExternalStore, without providers, contexts, or boilerplate.
+
+Why choose Storio over Zustand or Redux?
+
+- ⚖️ Zero overhead: No providers, no context, no middleware layer — just a tiny hook-based store
+- 🧩 Drop‑in simplicity: API mirrors the mental model of Zustand’s create, but even smaller
+- ⚡ Selective re-renders: Components only update when the selected slice changes
+- 🔍 Deep equality guard: Built-in deep comparison prevents unnecessary updates out of the box
+- 🧠 Predictable by design: Powered by useSyncExternalStore for React‑official subscription semantics and SSR safety
+- 📦 Zero dependencies: Only react as a peer dependency
 
 ## Features
 
@@ -15,6 +24,10 @@ A lightweight, efficient state management solution for React applications with z
 
 ```bash
 npm install storio
+# or
+pnpm add storio
+# or
+yarn add storio
 ```
 
 ## Basic Usage
@@ -33,7 +46,7 @@ const useCounter = create((set) => ({
 
 // Use the store in your component
 function Counter() {
-  const count = useCounter((state) => state.count);
+  const {count} = useCounter();
   const { increment, decrement } = useCounter();
 
   return (
@@ -74,15 +87,34 @@ export const dimensionsStore = create((set) => ({
 
 // Usage in components
 function ResponsiveComponent() {
-  const isMobile = dimensionsStore();
+  const { isMobile } = dimensionsStore();
   
   return (
     <div>
-      {isMobile() ? 'Mobile View' : 'Desktop View'}
+      { isMobile() ? 'Mobile View' : 'Desktop View' }
     </div>
   );
 }
 ```
+
+Pattern: Expose computed helpers on the store and destructure them in components for clarity and reuse. Alternatively, you can select primitives with a selector if you prefer returning a boolean directly.
+
+### Storio vs Zustand vs Redux (quick comparison)
+
+| Criteria | Storio | Zustand | Redux Toolkit |
+|---|---|---|---|
+| Provider required | No | No | Yes (`<Provider>`) |
+| Dependencies | React peer only | `zustand` | `@reduxjs/toolkit`, `react-redux` |
+| API surface | Tiny | Small | Larger |
+| Boilerplate | None | Low | Medium |
+| Selective re-render | Yes (selector) | Yes (selector) | Yes (`useSelector`) |
+| Equality logic | Deep equality built-in | Shallow/ref equality by default | Custom via `useSelector` |
+| DevTools | Manual integration | Via middleware | Built-in DevTools |
+| Middleware | Not needed for basics | Optional addons | First-class |
+| SSR-safe | Yes (`useSyncExternalStore`) | Yes | Yes |
+| Learning curve | Very low | Low | Medium |
+
+If you want the smallest, most readable solution without sacrificing control, Storio is a great fit. If you need time‑travel debugging or a middleware ecosystem out‑of‑the‑box, Redux Toolkit remains excellent.
 
 ## Performance
 
@@ -98,7 +130,7 @@ Storio is built with performance in mind:
 
 Creates a new store with the given initial state and actions.
 
-- `storeCreator`: Function that receives `set` and returns the initial state and actions
+- `storeCreator`: function that receives `(set, get)` and returns the initial state and actions
 - Returns a hook that can be used to access the store state and actions
 
 ### Store Hook
@@ -108,7 +140,57 @@ The created hook provides several features:
 - **State Selection**: `const value = useStore((state) => state.value)`
 - **Action Access**: `const { setValue } = useStore()`
 - **Direct State Access**: `useStore.getState()`
-- **State Updates**: `useStore.setState(newState)`
+- **State Updates**: `useStore.setState(nextOrUpdater)`
+- **Subscription**: `useStore.subscribe(listener)`
+
+SSR: Storio uses `useSyncExternalStore` under the hood, providing correct server and client semantics without extra configuration.
+
+### Migration
+
+#### From Zustand
+
+Most stores migrate by changing the import. If your store only uses `set`, it’s a pure drop‑in.
+
+```jsx
+// Before
+import { create } from 'zustand';
+
+const useCounter = create((set) => ({
+  count: 0,
+  increment: () => set((s) => ({ count: s.count + 1 })),
+}));
+
+// After
+import { create } from 'storio';
+
+const useCounter = create((set) => ({
+  count: 0,
+  increment: () => set((s) => ({ count: s.count + 1 })),
+}));
+```
+
+If you used Zustand’s `get`, Storio exposes it as the second argument to `create((set, get) => ...)` and also via `useStore.getState()`.
+
+#### From Redux / RTK
+
+Replace slices and reducers with a small store and explicit actions. No provider needed.
+
+```jsx
+// Instead of slice + reducers
+import { create } from 'storio';
+
+export const useTodos = create((set, get) => ({
+  items: [],
+  add: (title) => set((s) => ({ items: [...s.items, { id: Date.now(), title }] })),
+  remove: (id) => set((s) => ({ items: s.items.filter((t) => t.id !== id) })),
+}));
+
+function TodoList() {
+  const items = useTodos((s) => s.items);
+  const { add, remove } = useTodos();
+  // ...
+}
+```
 
 ## Contributing
 
