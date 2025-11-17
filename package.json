@@ -1,8 +1,9 @@
 {
   "name": "storio",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "main": "index.js",
   "module": "index.js",
+  "types": "index.d.ts",
   "description": "A simple React store provider",
   "keywords": [
     "react",
@@ -17,6 +18,7 @@
   },
   "files": [
     "index.js",
+    "index.d.ts",
     "README.md"
   ],
   "scripts": {
